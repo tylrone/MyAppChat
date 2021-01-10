@@ -18,9 +18,9 @@ module.exports = function (db) {
                     db.createCollection("Messages");
                 }
             })
-            isAlready(db, "MessageChatDetail", function (result) {
+            isAlready(db, "MessagesChatDetail", function (result) {
                 if (!result) {
-                    db.createCollection("MessageChatDetail")
+                    db.createCollection("MessagesChatDetail")
                 }
             })
         }

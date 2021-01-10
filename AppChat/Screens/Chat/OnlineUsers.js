@@ -36,9 +36,10 @@ export default class OnlineUsers extends React.Component{
     callBackItem = (obj) => {
         this.callback(obj)
     }
-
+    
     render(){
         return(
+            
             <View style={styles.container}>
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
                     {

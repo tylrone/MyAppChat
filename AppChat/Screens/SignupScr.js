@@ -1,11 +1,9 @@
 import * as React from 'react';
-import {View, Text, StyleSheet, TextInput, ImageBackground, TouchableOpacity, Image, ToastAndroid} from 'react-native';
+import ToastAndroid from 'react';
+import {View, Text, StyleSheet, TextInput, ImageBackground, TouchableOpacity, Image} from 'react-native';
 import { Button } from "react-native-paper";
 import Urls from '../Const/Urls.js';
-//import {TouchableHighlight} from 'react-native-gesture-handler';
 
-
-// var ConstantURL = require('../Const/Urls.js');
 
 export default class SignupScr extends React.Component{
     constructor(props) {

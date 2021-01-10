@@ -1,11 +1,15 @@
 import * as React from 'react';
 import {View, Image, Button, StyleSheet, Text} from 'react-native';
 import {TouchableHighlight} from 'react-native-gesture-handler';
+import Urls from "../../Const/Urls";
 
 export default class ListUsersOnlineHorizon extends React.Component{
     constructor(props) {
         super(props)
-        this.callback = this.props.onClick
+        this.callback = this.props.onClick;
+        this.state = {
+            data : this.props.data,
+        }
     }
     onItemClick = () => {
         this.callback(this.props.data)
@@ -14,8 +18,8 @@ export default class ListUsersOnlineHorizon extends React.Component{
         return(
             <TouchableHighlight onPress={this.onItemClick} underlayColor={'#fff'}>
                 <View style={styles.container}>
-                    <Image style={styles.img_user}/>
-                    <Image style={styles.img_active}/>
+                    <Image style={styles.img_user} source={{uri: Urls.Domain+ '/' + this.state.data.avt}}/>
+                    <Image style={styles.img_active} />
                     <Text numberOfLines={1} style={styles.name}>{this.props.data.yourName}</Text>
                 </View>
             </TouchableHighlight>
@@ -26,7 +30,7 @@ export default class ListUsersOnlineHorizon extends React.Component{
 const styles = StyleSheet.create({
     container: {
         height: 80,
-        width: 80,
+        width: 70,
         marginStart: 10,
         marginEnd: 10,
         position: 'relative',
@@ -48,8 +52,9 @@ const styles = StyleSheet.create({
         height: 10,
         width: 10,
         position: 'absolute',
-        bottom: 0,
+        bottom: 30,
+        right:20,
         borderRadius: 5,
-        backgroundColor: ColorConstants.ColorGreen,
+        backgroundColor: '#00FF44',
     }
 })

@@ -1,7 +1,7 @@
 module.exports = class MessagesChatDetail {
-    constructor(idMessage, usenameChat, content, timeChat) {
+    constructor(idMessage, usernameChat, content, timeChat) {
         this.isMessage = idMessage
-        this.usenameChat = usenameChat
+        this.usernameChat = usernameChat
         this.content = content
         this.timeChat = timeChat
     }

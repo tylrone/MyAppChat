@@ -2,6 +2,7 @@ import * as React from 'react';
 import {View, Text, StyleSheet, TextInput, ToastAndroid, Image, TouchableOpacity} from 'react-native';
 // import {TouchableOpacity} from 'react-native-gesture-handler';
 import { Button } from "react-native-paper";
+import AsyncStorage  from '@react-native-community/async-storage';
 import Urls from '../Const/Urls.js';
 
 
@@ -60,6 +61,13 @@ class LoginScr extends React.Component{
             </View>
         )
     }
+    storeData = async (key,value) => {
+        try {
+          await AsyncStorage.setItem(key, value)
+        } catch (e) {
+          console.log(e);
+        }
+    }
 
     onClickSignup = () => {
         this.props.navigation.navigate('SignupScr');
@@ -85,10 +93,13 @@ class LoginScr extends React.Component{
                     return;
                 }
                 const dt = json.data;
+                const tk = json.token;
+                this.storeData('Token',tk);
+
                 this.props.navigation.navigate('HomeScr', {username: this.setState.username, data: dt});
             })
+            
     }
-
 }
 
 export default LoginScr;
