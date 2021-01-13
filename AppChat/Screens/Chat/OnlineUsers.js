@@ -9,20 +9,23 @@ export default class OnlineUsers extends React.Component{
         super(props);
         this.state = {
             username: this.props.username,
+            token: this.props.token,
             data: [],
         }
-        this.getAllUserOnline();
+        
         this.callback = this.props.onClick
 
     }
     componentDidMount() {
+        this.getAllUserOnline();
     }
 
     getAllUserOnline = () => {
         fetch(Urls.Domain + Urls.getAllUser, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                token: this.state.token
             },
             body: JSON.stringify({
                 username: this.state.username,
@@ -60,5 +63,6 @@ const styles = StyleSheet.create({
         height: 80,
         width: '100%',
         marginTop: 15,
+        zIndex:-1
     }
 })

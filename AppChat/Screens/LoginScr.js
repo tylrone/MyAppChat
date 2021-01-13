@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {View, Text, StyleSheet, TextInput, ToastAndroid, Image, TouchableOpacity} from 'react-native';
-// import {TouchableOpacity} from 'react-native-gesture-handler';
 import { Button } from "react-native-paper";
 import AsyncStorage  from '@react-native-community/async-storage';
 import Urls from '../Const/Urls.js';
@@ -12,54 +11,10 @@ class LoginScr extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            username: "",
-            password: "",
+            username:"",
+            password:"",
         }
 
-    }
-    render(){
-        return(
-            <View style={styles.container}>
-                <View>
-                    <Image style={styles.img_logo} source={require('../images/Discord-logo.jpg')}/>
-                    <TextInput 
-                        style={styles.textInput} 
-                        placeholder="Tài khoản" 
-                        value={this.setState.account}
-                        onChangeText={account => this.setState({username : account})} 
-                    />
-                    <TextInput 
-                        style={styles.textInput} 
-                        placeholder="Mật khẩu" 
-                        secureTextEntry={true} 
-                        value={this.setState.pass}
-                        onChangeText={pass => this.setState({password : pass})} 
-                    />
-                    <TouchableOpacity>
-                        <View style={styles.textRegister}>
-                            <Text style={{textAlign: 'right'}}>
-                                Quên mật khẩu
-                            </Text>
-                        </View>
-                    </TouchableOpacity>    
-                    <View>
-                        <Button  
-                            mode="contained" 
-                            style={{borderRadius:40, marginTop:20}} 
-                            color="purple"
-                            onPress={ () => this.onClickLogin()}
-                        >Đăng nhập</Button>
-                    </View>
-                </View>
-                <TouchableOpacity onPress={this.onClickSignup}>
-                    <View style={styles.textRegister}>
-                        <Text>
-                            Đăng ký
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        )
     }
     storeData = async (key,value) => {
         try {
@@ -96,10 +51,56 @@ class LoginScr extends React.Component{
                 const tk = json.token;
                 this.storeData('Token',tk);
 
-                this.props.navigation.navigate('HomeScr', {username: this.setState.username, data: dt});
+                this.props.navigation.navigate('HomeScr', {username: this.state.username, data: dt, token:tk});
+                
             })
-            
+        this.setState({username:"", password:""})
     }
+    render(){
+        return(
+            <View style={styles.container}>
+                <View>
+                    <Image style={styles.img_logo} source={require('../images/avt2.png')}/>
+                    <TextInput 
+                        style={styles.textInput} 
+                        placeholder="Tài khoản" 
+                        value={this.state.username}
+                        onChangeText={account => this.setState({username : account})} 
+                    />
+                    <TextInput 
+                        style={styles.textInput} 
+                        placeholder="Mật khẩu" 
+                        secureTextEntry={true} 
+                        value={this.state.password}
+                        onChangeText={pass => this.setState({password : pass})} 
+                    />
+                    <TouchableOpacity>
+                        <View style={styles.textRegister}>
+                            <Text style={{textAlign: 'right'}}>
+                                Quên mật khẩu
+                            </Text>
+                        </View>
+                    </TouchableOpacity>    
+                    <View>
+                        <Button  
+                            mode="contained" 
+                            style={{borderRadius:40, marginTop:20}} 
+                            color="purple"
+                            onPress={ () => this.onClickLogin()}
+                        >Đăng nhập</Button>
+                    </View>
+                </View>
+                <TouchableOpacity onPress={this.onClickSignup}>
+                    <View style={styles.textRegister}>
+                        <Text>
+                            Đăng ký
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+    
 }
 
 export default LoginScr;

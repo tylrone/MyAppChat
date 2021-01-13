@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {View, Text, StyleSheet, FlatList, BackHandler, ToastAndroid, Image, findNodeHandle} from 'react-native';
+import {View, Text, StyleSheet, FlatList, BackHandler, ToastAndroid, Image,} from 'react-native';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import io from 'socket.io-client';
@@ -10,6 +10,7 @@ export default class GUIchat extends React.Component{
     constructor(props) {
         super(props)
         this.state = {
+            token: this.props.route.params.token,
             usernameOne: this.props.route.params.usernameOne,
             usernameTwo: this.props.route.params.usernameTwo,
             yournameTwo: this.props.route.params.yournameTwo,
@@ -49,7 +50,8 @@ export default class GUIchat extends React.Component{
         fetch(Urls.Domain + Urls.CHAT_SOLO, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                token: this.state.token
             },
             body: JSON.stringify({
                 username: this.state.usernameOne,
@@ -93,7 +95,6 @@ export default class GUIchat extends React.Component{
 
 
     render(){
-        // console.log(this.socket)
         return(
             <View style={css.container}>
                 <View style={css.groud_user_search}>
@@ -109,7 +110,7 @@ export default class GUIchat extends React.Component{
                     <Text style={css.user_chat}>{this.state.yournameTwo}</Text>
                 </View>
 
-                <View style={{marginBottom: 60, marginTop: 10, height:600}}>
+                <View style={{marginBottom: 60, marginTop: 10, height:630}}>
                     <ScrollView>
                         <FlatList
                             style={css.group_chat}
@@ -124,16 +125,7 @@ export default class GUIchat extends React.Component{
                                             />
                                 }
                             }
-                        />  
-                        {/* {this.state.data.map((e,i) => (
-                            <SingleItemChat
-                                username={this.state.usernameOne} 
-                                data={e}
-                                keyExtractor={i}
-                            />
-                        ))
-                            
-                        } */}
+                        /> 
                     </ScrollView>
                 </View>
 
@@ -159,7 +151,7 @@ const css = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: 45,
+        paddingTop: 35,
         position: 'relative',
     },
     img_user: {

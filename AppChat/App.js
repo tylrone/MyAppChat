@@ -8,6 +8,8 @@ import LoginScr from "./Screens/LoginScr.js";
 import SignupScr from './Screens/SignupScr.js';
 import HomeScr from './Screens/Home/HomeScr.js';
 import GUIchat from './Screens/Chat/GUIchat.js';
+import ProfScr from './Screens/Home/ProfScr';
+import UpdateProf from './Screens/Home/UpdateProf';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +24,8 @@ export default class App extends React.Component {
           <Stack.Screen name='HomeScr' component={HomeScr} options={{headerShown: false}}/>
           <Stack.Screen name='GUIchat' component={GUIchat} options={{headerShown: false}}/>
           <Stack.Screen name='SignupScr' component={SignupScr} options={{headerShown: false}}/>
+          <Stack.Screen name='ProfScr' component={ProfScr} options={{headerShown: false}}/>
+          <Stack.Screen name='UpdateProf' component={UpdateProf} options={{headerShown: false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     );

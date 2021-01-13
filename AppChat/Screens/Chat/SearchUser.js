@@ -11,7 +11,7 @@ export default class SearchUser extends React.Component{
             textInput: '',
         }
 
-        this.callback = this.props.onChange
+        this.callback = this.props.onChange;
 
     }
     onTextChange = (e) => {
@@ -23,6 +23,7 @@ export default class SearchUser extends React.Component{
                 <TextInput 
                     placeholder='Tìm tên...' 
                     style={styles.textinput}
+                    value={this.props.yournameSearch}
                     onChangeText={(e) => this.onTextChange(e)}
                 />
                 <Icon name='search' style={styles.icon_search}/>
@@ -39,8 +40,9 @@ const styles = StyleSheet.create({
         paddingEnd: 20,
         borderRadius: 50,
         marginTop: 25,
-        backgroundColor: '#ddd',
+        backgroundColor: '#EEEEEE',
         flexDirection: 'row',
+        zIndex:-1
     },
     icon_search: {
         flex: 1,
@@ -54,5 +56,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingStart: 5,
         flex: 10,
+        backgroundColor:'#EEEEEE'
     }
 })

@@ -26,9 +26,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use(express.static('Uploads'))
-// app.get('/Uploads', (req, res) => {
-//     res.send("<img src=avt1.jpg />");
-// })
+
 
 const url = "mongodb://localhost:27017/appchat"
 MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, function (err, db) {
@@ -76,7 +74,7 @@ MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, fun
                         content: ct, 
                         timeChat: time
                     }
-
+                    myDb.collection('Messages').updateOne({idMessage: id}, {$set:{lastTime: time}});
                     myDb.collection('MessagesChatDetail').insertOne(insert, function (err, result) {
                         if (err) {
                             throw err;
@@ -86,11 +84,7 @@ MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, fun
                                 usernameChat: userOne,
                                 content: ct,
                                 timeChat: time,
-                                //avt: account.avt
                             }
-                            console.log(userOne)
-                            console.log(userTwo)
-                            console.log(id);
 
                             socket.to(id).emit('re_user', obj)
                             socket.to(userTwo).emit(userTwo, obj)
@@ -100,7 +94,6 @@ MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, fun
                                 usernameChat: userTwo,
                                 content: ct,
                                 timeChat: time,
-                                //avt: account.avt
                             }
                             socket.to(userOne).emit(userOne, objMyself)
                         }
@@ -179,52 +172,91 @@ MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, fun
         let usernameChat = req.body.username;
         let usernameClientChat = req.body.usernameclient;
         let timeCreated = req.body.time;
-        let _avt = await myDb.collection("Users").findOne({userName: usernameClientChat});
-        checkAlready(myDb.collection("Messages"), usernameChat, usernameClientChat, function (result) {
-            let isalready = result.isalready;
-            if (isalready) {
-                let _id = result.idchat;
-                let query = {
-                    idMessage: result.idchat
-                }
-                myDb.collection("MessagesChatDetail").find(query).toArray( function(err, result){
-                    let obj = {
-                        avt : _avt.avt,
-                        idMessage: _id,
-                        result: result
+        let token = req.headers.token;
+        var decode = jwt.verify(token, 'secrectkey');
+        let check = await myDb.collection('Users').findOne({userName: usernameChat});
+        if(decode._id == check._id){
+            let _avt = await myDb.collection("Users").findOne({userName: usernameClientChat});
+            checkAlready(myDb.collection("Messages"), usernameChat, usernameClientChat, function (result) {
+                let isalready = result.isalready;
+                if (isalready) {
+                    let _id = result.idchat;
+                    let query = {
+                        idMessage: result.idchat
                     }
-                    res.status(200).send(JSON.stringify(obj));
-                }) 
-            } else {
-                const query = {
-                    idMessage: usernameChat + '||' + usernameClientChat,
-                    usenameOne: usernameChat,
-                    usenameTwo: usernameClientChat,
-                    timeCreate: timeCreated,
-                }
-                myDb.collection("Messages").insertOne(query, (err, result) => {
-                    let obj = {
-                        avt : _avt.avt,
-                        idMessage: query.idMessage,
-                        result: []
+                    myDb.collection("MessagesChatDetail").find(query).toArray( function(err, result){
+                        let obj = {
+                            avt : _avt.avt,
+                            idMessage: _id,
+                            result: result
+                        }
+                        res.status(200).send(JSON.stringify(obj));
+                    }) 
+                } else {
+                    const query = {
+                        idMessage: usernameChat + '||' + usernameClientChat,
+                        usenameOne: usernameChat,
+                        usenameTwo: usernameClientChat,
+                        timeCreate: timeCreated,
+                        lastTime: timeCreated
                     }
-                    res.send(JSON.stringify(obj));
-                })
-
-            }
-        })
-
+                    myDb.collection("Messages").insertOne(query, (err, result) => {
+                        let obj = {
+                            avt : _avt.avt,
+                            idMessage: query.idMessage,
+                            result: []
+                        }
+                        res.send(JSON.stringify(obj));
+                    })
+                }
+            })
+        }
     })
 
     //tim ten user
-    app.post('/search', (req, res) => {
+    app.post('/search', async (req, res) => {
         let tk = req.body.token;
+        let username = req.body.username;
+        let username_search = req.body.username_search;
         let query = {
-            userName: req.body.userName
+            userName: req.body.username_search
         }
-        myDb.collection('Users').find(query, (err, result) => {
+        myDb.collection('Users').find(query, async (err, result) => {
             if (result != null) {
-                res.status(200).send(JSON.stringify(result));
+                let data = await myDb.collection("Messages").find({'idMessage': {$regex: username}}).sort({lastTime:1}).toArray();
+               
+                let account;
+                let obj = [];
+                for (let index = 0; index < data.length; index++) {
+                    let name = getUserNameClient(data[index].idMessage, username);
+                    if(name == username_search){
+                        let query = {
+                            userName: name,
+                        }
+                        account = await myDb.collection('Users').findOne(query);
+                        let yourName = account.yourName;
+                        const avt = account.avt;
+                        let query_chat ={
+                            idMessage: data[index].idMessage,
+            
+                        }
+                        let data_chat = await myDb.collection("MessagesChatDetail").find(query_chat).sort({timeChat:1}).toArray();
+                        const chatTotal = data_chat;
+                        if (chatTotal.length === 0) {
+                            obj.unshift({nameclient: name, yourname: yourName, content: data_chat.content, timechatlast: data_chat.timeChat, avt: avt})
+                        } else {
+                            objChat = chatTotal[chatTotal.length - 1]
+                            obj.unshift({
+                                nameclient: name,
+                                yourname: yourName,
+                                content: objChat.content,
+                                timechatlast: objChat.timeChat,
+                                avt: avt,
+                            })
+                        }
+                    }  
+                }
+                res.send(obj);
             } else {
                 res.status(400).send();
             }
@@ -232,46 +264,81 @@ MongoClient.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, fun
     })
 
     app.post('/getuserchat', async (req, res) => {
-        let username = req.body.username;        
-        let data = await myDb.collection("Messages").find({'idMessage': {$regex: username}}).toArray();
-        let account;
-        let obj = [];
-        for (let index = 0; index < data.length; index++) {
-            let name = getUserNameClient(data[index].idMessage, username);
-            let query = {
-                userName: name,
+        let username = req.body.username;  
+        let token = req.headers.token;
+        
+        var decode = jwt.verify(token, 'secrectkey');
+        let check = await myDb.collection('Users').findOne({userName: username});
+        if(decode._id == check._id){
+            let data = await myDb.collection("Messages").find({'idMessage': {$regex: username}}).sort({lastTime:1}).toArray();
+            
+            let account;
+            let obj = [];
+            for (let index = 0; index < data.length; index++) {
+                let name = getUserNameClient(data[index].idMessage, username);
+                let query = {
+                    userName: name,
+                }
+                
+                account = await myDb.collection('Users').findOne(query);
+                let yourName = account.yourName;
+                const avt = account.avt;
+                let query_chat ={
+                    idMessage: data[index].idMessage,
+    
+                }
+                let data_chat = await myDb.collection("MessagesChatDetail").find(query_chat).sort({timeChat:1}).toArray();
+                const chatTotal = data_chat;
+                if (chatTotal.length === 0) {
+                    obj.unshift({nameclient: name, yourname: yourName, content: data_chat.content, timechatlast: data_chat.timeChat, avt: avt})
+                } else {
+                    objChat = chatTotal[chatTotal.length - 1]
+                    obj.unshift({
+                        nameclient: name,
+                        yourname: yourName,
+                        content: objChat.content,
+                        timechatlast: objChat.timeChat,
+                        avt: avt
+                    })
+                }
             }
-            account = await myDb.collection('Users').findOne(query);
-            let yourName = account.yourName;
-            const avt = account.avt;
-            let query_chat ={
-                idMessage: data[index].idMessage,
-                 //idMessage: {$regex: data[index].idMessage},
-
-            }
-            let data_chat = await myDb.collection("MessagesChatDetail").find(query_chat).sort({timeChat:1}).toArray();
-            const chatTotal = data_chat;
-            if (chatTotal.length === 0) {
-                obj.push({nameclient: name, yourname: yourName, content: data_chat.content, timechatlast: data_chat.timeChat, avt: avt})
-            } else {
-                objChat = chatTotal[chatTotal.length - 1]
-                obj.push({
-                    nameclient: name,
-                    yourname: yourName,
-                    content: objChat.content,
-                    timechatlast: objChat.timeChat,
-                    avt: avt
-                })
-            }
-        }
-        res.send(obj)
+            res.send(obj)  
+        }  
     })
-
+    //cap nhat ho so
+    app.post('/updateprof', async (req, res) => {
+        let username = req.body.username;  
+        let myname = req.body.myname;
+        let password = req.body.password;
+        let token = req.headers.token;
+        var decode = jwt.verify(token, 'secrectkey');
+        let obj = [];
+        let check = await myDb.collection('Users').findOne({userName: username});
+        if(decode._id == check._id){
+            if(password != ""){
+                myDb.collection('Users').updateOne({userName: username}, {$set:{yourName: myname, password: password}});
+                obj = await myDb.collection('Users').findOne({userName: username});
+            }
+            else{
+                myDb.collection('Users').updateOne({userName: username}, {$set:{yourName: myname}});
+                obj = await myDb.collection('Users').findOne({userName: username});
+            }
+            
+            res.send(obj);  
+        }  
+    })
     //lay tat ca user ton tai
-    app.post('/getalluser', (req, res) => {
-        myDb.collection('Users').find({userName: {$nin: [req.body.username]}}).toArray(function (err, result) {
-            res.send(JSON.stringify(result));
-        })
+    app.post('/getalluser', async (req, res) => {
+        let username = req.body.username;
+        let token = req.headers.token;
+        var decode = jwt.verify(token, 'secrectkey');
+        let check = await myDb.collection('Users').findOne({userName: username});
+        if(decode._id == check._id){
+            myDb.collection('Users').find({userName: {$nin: [req.body.username]}}).toArray(function (err, result) {
+                res.send(JSON.stringify(result));
+            })
+        }
+       
     })
 })
 

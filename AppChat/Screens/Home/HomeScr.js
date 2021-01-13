@@ -1,37 +1,40 @@
 import * as React from 'react';
-import {View, Text, StyleSheet, Image, ScrollView, ProgressBarAndroid, Alert} from 'react-native';
+import {View, Text, StyleSheet, Image, ScrollView, ProgressBarAndroid, Alert, ListView} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Urls from '../../Const/Urls';
 import SearchUser from '../Chat/SearchUser'
 import OnlineUsers from '../Chat/OnlineUsers.js';
 import ListChat from '../Chat/ListChat';
 import AsyncStorage  from '@react-native-community/async-storage';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { DrawerLayoutAndroid, FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default class HomeScr extends React.Component{
     constructor(props) {
         super(props)
         this.state = {
             username: this.props.route.params.data.userName,
+            token:this.props.route.params.token,
             dataUser: this.props.route.params.data,
             yourNameSearch: '',
+            display:'none'
         }
-        let timeMili = Date.now();
-        let dt = new Date(timeMili);
+        // let timeMili = Date.now();
+        // let dt = new Date(timeMili);
         
     }
     componentDidMount(){
-        this.getData();
+        //this.getData();
     }
-    getData = async () => {
-        try {
-            this.setState({
-                Token:(await AsyncStorage.getItem('Token')).toString()
-              });
-          } catch(e) {
-            console.log(e);
-          }
-      }
+    // getData = async () => {
+    //     try {
+    //         this.setState({
+    //             Token:(await AsyncStorage.getItem('Token')).toString()
+    //           });
+    //       } catch(e) {
+    //         console.log(e);
+    //       }
+    //   }
     checkSocket = () => {
     }
 
@@ -43,24 +46,28 @@ export default class HomeScr extends React.Component{
     onClickItemUserOnline = (obj) => {
         this.props.navigation.navigate('GUIchat', {
             usernameOne: this.state.username,
+            token: this.state.token,
             usernameTwo: obj.userName,
             yournameTwo: obj.yourName
         });
     }
 
     onCLickItemChatList = (obj) => {
+        
         this.props.navigation.navigate('GUIchat', {
             usernameOne: this.state.username,
+            token: this.state.token,
             usernameTwo: obj.nameclient,
-            yournameTwo: obj.yourname
+            yournameTwo: obj.yourname,
+           
         })
+        this.setState({yourNameSearch:''})
     }
     
     handleLongPress = ()=>{
         console.log("onlongpress");
         Alert.alert(
             'Xóa',
-            // boby
             'Bạn có chắc muốn xóa',
             [
                 {text: 'OK', onPress: () => console.log('ok')},
@@ -73,24 +80,74 @@ export default class HomeScr extends React.Component{
         )
     }
     
+    handleOnClick = () => {
+        if(this.state.display == 'none'){
+            this.setState({display:'flex'});
+        }
+        else{
+            this.setState({display:'none'});
+        }
+    }
+    
     render(){
+        console.log(this.state.yourNameSearch);
         return(
             <View style={styles.container}>
                <View style={styles.group_title}>
-                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                       <Image style={styles.img_user} source={{uri: Urls.Domain+ '/' + this.state.dataUser.avt}} />
-                       <Text style={styles.tl}>{this.state.dataUser.yourName}</Text>
-                   </View>
+                   <TouchableOpacity onPress={this.handleOnClick}>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <Image style={styles.img_user} source={{uri: Urls.Domain+ '/' + this.state.dataUser.avt}} />
+                            <Text style={styles.tl}>{this.props.route.params.data.yourName}</Text>
+                        </View>
+                   </TouchableOpacity>
+                   <View  style={{
+                        display: this.state.display, 
+                        position:'absolute',
+                        left:30,
+                        top:50,
+                        backgroundColor:'#ddd',
+                        width:120,
+                        borderRadius:10,
+                        alignItems:'center',}}
+                    >
+                        <View style={styles.menu_Item}>
+                            <TouchableOpacity
+                                style={{width:120,alignItems:'center'}}
+                                onPress={() => {this.props.navigation.navigate('ProfScr', {data: this.state.dataUser, token: this.state.token})}}
+                            >
+                                <Text>Hồ Sơ</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.menu_Item}>
+                            <TouchableOpacity
+                                style={{width:120,alignItems:'center'}}
+                                onPress={() => {this.props.navigation.popToTop('LoginScr')}}
+                            >
+                                <Text>Đăng xuất</Text>
+                            </TouchableOpacity>
+                        </View>
+                        
+                    </View>
                    <TouchableOpacity delayLongPress={3000} onLongPress={this.handleLongPress}>
-                    <Icon name='pencil' style={styles.img_newChat}/>
+                        <Icon name='pencil' style={styles.img_newChat}/>
                    </TouchableOpacity>
                </View>
-               <SearchUser username={this.state.username} onChange={this.handlerChangeInputText}></SearchUser>
-               <OnlineUsers username={this.state.username} onClick={this.onClickItemUserOnline}/>
-               <ListChat 
+               <SearchUser 
                     username={this.state.username} 
                     yourNameSearch={this.state.yourNameSearch}
+                    onChange={this.handlerChangeInputText}
+                />
+               <OnlineUsers 
+                    username={this.state.username} 
+                    onClick={this.onClickItemUserOnline}
+                    token = {this.state.token}
+                />
+               <ListChat 
+                    username={this.state.username} 
+                    token = {this.state.token}
+                    yourNameSearch={this.state.yourNameSearch}
                     onClick={this.onCLickItemChatList}
+                   
                 />
                
             </View>
@@ -103,18 +160,30 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#fff',
         flex: 1,
-        // alignItems:'center',
         paddingTop:35,
-        //paddingLeft:10,
+        position:'relative'
+    },
+    menu:{
+        position:'absolute',
+        left:30,
+        top:50,
+        backgroundColor:'yellow',
+        width:120,
+        borderRadius:10,
+        alignItems:'center',
+    },
+    menu_Item:{
+        paddingTop:5,
+        paddingBottom:5,
+        width:120,
+        height:40,
+        alignItems:'center'
     },
     group_title: {
-        // marginTop: Expo.Constants.statusBarHeight,
         height: 60,
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
-        //marginStart: 20,
-        //marginEnd: 20,
         paddingLeft:10,
         paddingRight:10,
         backgroundColor:"#ddd"

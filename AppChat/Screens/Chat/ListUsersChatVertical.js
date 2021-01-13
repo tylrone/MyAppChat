@@ -35,7 +35,7 @@ export default class ListUsersChatVertical extends React.Component{
             <TouchableOpacity delayLongPress={1000} onPress={this.onClickView} onLongPress={this.onLongClickView}>
                 <View style={styles.container}>
                     <View style={styles.container_img}>
-                        <Image style={styles.img_represent} source={{uri: Urls.Domain+ '/' + this.state.data.avt}} />
+                        <Image style={styles.img_represent} source={{uri: Urls.Domain+ '/' + this.props.data.avt}} />
                     </View>
                     <View style={styles.container_content}>
                         <View style={styles.title_top}>
@@ -57,7 +57,7 @@ function formatTime(milisecond, callback) {
     let day = d.getDate();
     day = formatNumber(day)
 
-    let month = d.getMonth();
+    let month = d.getMonth()+1;
     month = formatNumber(month)
 
     let year = d.getFullYear();
@@ -115,10 +115,10 @@ const styles = StyleSheet.create({
     },
     tv_content: {
         flex: 1,
-        color: '#ddd',
+        color: 'gray',
     },
     tv_time: {
-        color: '#ddd',
+        color: 'gray',
         marginEnd: 10,
     },
 

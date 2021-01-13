@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     img_user: {
-        backgroundColor: 'gray',
+        backgroundColor: '#ddd',
         height: 50,
         width: 50,
         borderRadius: 25,

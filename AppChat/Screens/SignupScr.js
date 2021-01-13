@@ -21,7 +21,7 @@ export default class SignupScr extends React.Component{
         return(
             <View style={styles.container}>
                 <View>
-                    <Image style={styles.img_logo} source={require('../images/Discord-logo.jpg')}/>
+                    <Image style={styles.img_logo} source={require('../images/avt2.png')}/>
                     <TextInput 
                         style={styles.textInput} 
                         placeholder="Họ và tên" 
